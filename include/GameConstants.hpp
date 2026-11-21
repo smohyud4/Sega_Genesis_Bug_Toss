@@ -13,16 +13,16 @@ inline constexpr float DROPPER_SPEED = 250.f;
 inline constexpr float PLAYER_SPEED = 300.f;
 inline constexpr float BUG_BOTTOM = 200.f;
 inline constexpr std::size_t MAX_BUGS = 4;
-inline constexpr float MINIMUM_SPAWN_DELAY = 0.6f;
-inline constexpr float MAXIMUM_SPAWN_DELAY = 1.8f;
+inline constexpr float MINIMUM_SPAWN_DELAY = 0.20f;
+inline constexpr float MAXIMUM_SPAWN_DELAY = 1.5f;
 inline constexpr int DIFFICULTY_THRESHOLD = 40;
-inline constexpr float HARD_SPAWN_DELAY_MULTIPLIER = 0.8f;
-inline constexpr float HARD_GRAVITY_MULTIPLIER = 1.2f;
+inline constexpr float HARD_SPAWN_DELAY_MULTIPLIER = 0.80f;
+inline constexpr float HARD_GRAVITY_MULTIPLIER = 1.20f;
 inline constexpr unsigned int MENU_TEXT_SIZE = 24;
 inline constexpr float TEXT_ANIMATION_DURATION = 1.f;
-inline constexpr std::array<float, 3> BUG_GRAVITIES = {40.f, 60.f, 100.f};
+inline constexpr std::array<float, 3> BUG_GRAVITIES = {80.f, 80.f * 1.5f, 80.f * 2.f};
 inline constexpr float DROPPER_STEP_DISTANCES[] = {
-    400.f / 3.f, 800.f / 3.f, 1200.f / 3.f
+    600.f / 3.f, 1000.f / 3.f, 1200.f / 3.f
 };
 inline constexpr float PLAYER_EATING_DURATION = 0.12f;
 inline constexpr float PLAYER_BURPING_DURATION = 1.5f;

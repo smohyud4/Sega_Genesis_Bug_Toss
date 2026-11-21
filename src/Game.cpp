@@ -188,7 +188,7 @@ void Game::update(sf::Time dt)
     player_.update(dt);
     dropper_.update(dt);
 
-    bool isBurping_ = player_.state() == Player::State::Burp;
+    bool isBurping = player_.state() == Player::State::Burp;
 
     for (Bug& bug : bugs_)
     {
@@ -229,14 +229,11 @@ void Game::update(sf::Time dt)
         return false;
     });
 
-    if (state_ == State::Play)
+    spawnTimer_ -= dt.asSeconds();
+    if (!isBurping && spawnTimer_ <= 0.f && bugs_.size() < constants::MAX_BUGS)
     {
-        spawnTimer_ -= dt.asSeconds();
-        if (!isBurping_ && spawnTimer_ <= 0.f && bugs_.size() < constants::MAX_BUGS)
-        {
-            spawnBug();
-            spawnTimer_ = nextSpawnDelay();
-        }
+        spawnBug();
+        spawnTimer_ = nextSpawnDelay();
     }
 }
 
@@ -290,13 +287,42 @@ void Game::startGame()
 
 void Game::spawnBug()
 {
+    const auto deadlyCount = std::count_if(bugs_.begin(), bugs_.end(),
+    [](const Bug& b) { return b.isDeadly(); });
+
+    const bool canSpawnDeadly = bugs_.size() <= 1;
+    const bool canSpawnSafe   = deadlyCount <= 1;
+
+    if (!canSpawnDeadly && !canSpawnSafe)
+    {
+        return;
+    }
+
     float gravity = constants::BUG_GRAVITIES[gravityPick_(randomEngine_)];
     if (difficulty_ == Difficulty::Hard)
     {
         gravity *= constants::HARD_GRAVITY_MULTIPLIER;
     }
+    int bugIndex;
 
-    bugs_.emplace_back(bugTexture_, dropper_.position(), gravity, bugPick_(randomEngine_));
+    if (canSpawnDeadly && canSpawnSafe)
+    {
+        bugIndex = bugPick_(randomEngine_);
+        bugs_.emplace_back(bugTexture_, dropper_.position(), gravity, bugIndex);
+    }
+    else if (!canSpawnSafe)
+    {
+        bugIndex = static_cast<int>(constants::BUG_FRAMES.size()) - 1;
+        bugs_.emplace_back(bugTexture_, dropper_.position(), gravity, bugIndex);
+    }
+    else 
+    {
+        do {
+            bugIndex = bugPick_(randomEngine_);
+        } while(constants::BUG_DEADLINESS[bugIndex]);
+
+        bugs_.emplace_back(bugTexture_, dropper_.position(), gravity, bugIndex);
+    }
 }
 
 float Game::nextSpawnDelay()

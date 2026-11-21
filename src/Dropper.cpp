@@ -74,7 +74,7 @@ void Dropper::move(float dt)
 
 sf::Vector2f Dropper::position() const
 {
-    return sprite_.getPosition();
+    return {sprite_.getPosition().x, sprite_.getPosition().y - sprite_.getGlobalBounds().size.y / 2.f};
 }
 
 void Dropper::draw(sf::RenderTarget& target) const
