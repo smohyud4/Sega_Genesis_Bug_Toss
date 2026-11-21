@@ -1,6 +1,7 @@
 #include "Player.hpp"
 
 #include "GameConstants.hpp"
+#include <iostream>
 
 namespace bug_toss
 {
@@ -120,6 +121,7 @@ void Player::startBurping()
     if (state_ != State::Burp)
     {
         state_ = State::Burp;
+        burpingTime_ = 0.f;
     }
 }
 
