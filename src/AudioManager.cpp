@@ -3,22 +3,34 @@
 namespace bug_toss
 {
 AudioManager::AudioManager()
-    : eatSound_(eatBuffer_), damageSound_(damageBuffer_), victorySound_(victoryBuffer_)
+    : damageSound_(damageBuffer_), victorySound_(victoryBuffer_)
 {
-    // Load background music
-    if (!music_.openFromFile("assets/sounds/09 - Under the Stars.mp3"))
+    // Load game background music
+    if (!gameMusic_.openFromFile("assets/sounds/09 - Under the Stars.mp3"))
     {
         throw std::runtime_error("Failed to load background music");
     }
-    music_.setLooping(true);
-    music_.setVolume(70.f);
+    gameMusic_.setLooping(true);
+    gameMusic_.setVolume(70.f);
+
+    // Load start screen music
+    if (!startScreenMusic_.openFromFile("assets/sounds/03 - Hoo Hah.mp3"))
+    {
+        throw std::runtime_error("Failed to load start screen music");
+    }
+    startScreenMusic_.setLooping(true);
+    startScreenMusic_.setVolume(70.f);
 
     // Load sound effects
     if (!eatBuffer_.loadFromFile("assets/sounds/pumba_gulp.mp3"))
     {
         throw std::runtime_error("Failed to load eat sound effect");
     }
-    eatSound_.setBuffer(eatBuffer_);
+   
+    for (std::size_t i = 0; i < EAT_SOUND_POOL_SIZE_; i++)
+    {
+        eatSounds_.emplace_back(eatBuffer_);
+    }
 
     if (!damageBuffer_.loadFromFile("assets/sounds/pumba_burp.mp3"))
     {
@@ -33,14 +45,48 @@ AudioManager::AudioManager()
     victorySound_.setBuffer(victoryBuffer_);
 }
 
-void AudioManager::playMusic()
+void AudioManager::playMusic(MusicTrack music)
 {
-    music_.play();
+    switch (music)
+    {
+        case MusicTrack::Playing:
+            if (gameMusic_.getStatus() != sf::Music::Status::Playing)
+            {
+                gameMusic_.play();
+            }
+            break;
+        case MusicTrack::Start:
+            if (startScreenMusic_.getStatus() != sf::Music::Status::Playing)
+            {
+                startScreenMusic_.play();
+            }
+            break;
+    } 
 }
 
-void AudioManager::stopMusic()
+void AudioManager::stopMusic(MusicTrack music)
 {
-    music_.stop();
+    switch (music)
+    {
+        case MusicTrack::Playing:
+            gameMusic_.stop();
+            break;
+        case MusicTrack::Start:
+            startScreenMusic_.stop();
+            break;
+    } 
+}
+
+void AudioManager::playEatSound()
+{
+    for (auto& sound : eatSounds_)
+    {
+        if (sound.getStatus() == sf::Sound::Status::Stopped)
+        {
+            sound.play();
+            return;
+        }
+    }
 }
 
 void AudioManager::playSound(SoundEffect effect)
@@ -48,7 +94,7 @@ void AudioManager::playSound(SoundEffect effect)
     switch (effect)
     {
         case SoundEffect::Eat:
-            eatSound_.play();
+            playEatSound();
             break;
         case SoundEffect::Burp:
             damageSound_.play();

@@ -19,7 +19,7 @@ public:
 private:
     sf::Sprite sprite_;
     float gravity_;
-    float speed_ = 10.f;
+    float speed_ = 0.f;
     bool isDeadly_;
 };
 }

@@ -15,12 +15,23 @@ inline constexpr float BUG_BOTTOM = 200.f;
 inline constexpr std::size_t MAX_BUGS = 4;
 inline constexpr float MINIMUM_SPAWN_DELAY = 0.20f;
 inline constexpr float MAXIMUM_SPAWN_DELAY = 1.5f;
-inline constexpr int DIFFICULTY_THRESHOLD = 40;
-inline constexpr float HARD_SPAWN_DELAY_MULTIPLIER = 0.80f;
-inline constexpr float HARD_GRAVITY_MULTIPLIER = 1.20f;
+inline constexpr int MEDIUM_DIFFICULTY_THRESHOLD = 30;
+inline constexpr int HARD_DIFFICULTY_THRESHOLD = 60;
 inline constexpr unsigned int MENU_TEXT_SIZE = 24;
 inline constexpr float TEXT_ANIMATION_DURATION = 1.f;
-inline constexpr std::array<float, 3> BUG_GRAVITIES = {80.f, 80.f * 1.5f, 80.f * 2.f};
+inline constexpr std::array<float, 3> BUG_GRAVITIES = {75.f, 75.f * 1.5f, 75.f * 2.25f};
+
+struct DifficultyScale
+{
+    float spawnDelayMultiplier;
+    float gravityMultiplier;
+};
+
+inline constexpr std::array<DifficultyScale, 3> DIFFICULTY_SCALES{{
+    {1.f, 1.1f},
+    {0.9f, 1.25f},
+    {0.9f, 1.4f}
+}};
 inline constexpr float DROPPER_STEP_DISTANCES[] = {
     600.f / 3.f, 1000.f / 3.f, 1200.f / 3.f
 };

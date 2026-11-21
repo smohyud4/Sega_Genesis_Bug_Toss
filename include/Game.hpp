@@ -31,6 +31,7 @@ private:
     enum class Difficulty
     {
         Easy,
+        Medium,
         Hard
     };
 
@@ -42,6 +43,7 @@ private:
     void endGame();
     void spawnBug();
     [[nodiscard]] float nextSpawnDelay();
+    void updateDifficulty();
     void centerText(sf::Text& text, sf::Vector2f position) const;
     void handleMenuActivation(sf::Vector2f position);
 
@@ -74,7 +76,6 @@ private:
     std::vector<Bug> bugs_;
     int burpAttempts_ = 1;
     int score_ = 0;
-    int difficultyThreshold_;
     State state_ = State::Start;
     Difficulty difficulty_ = Difficulty::Easy;
     float spawnTimer_ = 0.f;

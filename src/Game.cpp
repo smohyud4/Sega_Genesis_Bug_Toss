@@ -72,8 +72,7 @@ Game::Game()
       spawnDelayPick_(constants::MINIMUM_SPAWN_DELAY,
                       constants::MAXIMUM_SPAWN_DELAY),
       player_(pumbaTexture_, constants::PLAYER_SPEED, {constants::PLAYER_START_X, constants::PLAYER_START_Y}),
-      dropper_(timonTexture_, constants::DROPPER_SPEED, randomEngine_, makeDropperPath()),
-      difficultyThreshold_(constants::DIFFICULTY_THRESHOLD)
+      dropper_(timonTexture_, constants::DROPPER_SPEED, randomEngine_, makeDropperPath())
 {
     window_.setMinimumSize(
         sf::Vector2u{constants::INTERNAL_WIDTH, constants::INTERNAL_HEIGHT});
@@ -99,6 +98,8 @@ Game::Game()
 void Game::run()
 {
     sf::Clock clock;
+    audioManager_.playMusic(AudioManager::MusicTrack::Start);
+
     while (window_.isOpen())
     {
         processEvents();
@@ -214,10 +215,7 @@ void Game::update(sf::Time dt)
             {
                 audioManager_.playSound(AudioManager::SoundEffect::Eat);
                 ++score_;
-                if (score_ >= difficultyThreshold_)
-                {
-                    difficulty_ = Difficulty::Hard;
-                }
+                updateDifficulty();
                 if (score_ >= 99)
                 {
                     endGame();
@@ -281,7 +279,8 @@ void Game::startGame()
     difficulty_ = Difficulty::Easy;
     spawnTimer_ = nextSpawnDelay();
 
-    audioManager_.playMusic();
+    audioManager_.stopMusic(AudioManager::MusicTrack::Start);
+    audioManager_.playMusic(AudioManager::MusicTrack::Playing);
     state_ = State::Play;
 }
 
@@ -299,10 +298,9 @@ void Game::spawnBug()
     }
 
     float gravity = constants::BUG_GRAVITIES[gravityPick_(randomEngine_)];
-    if (difficulty_ == Difficulty::Hard)
-    {
-        gravity *= constants::HARD_GRAVITY_MULTIPLIER;
-    }
+    const auto& scale = constants::DIFFICULTY_SCALES[
+        static_cast<std::size_t>(difficulty_)];
+    gravity *= scale.gravityMultiplier;
     int bugIndex;
 
     if (canSpawnDeadly && canSpawnSafe)
@@ -327,9 +325,25 @@ void Game::spawnBug()
 
 float Game::nextSpawnDelay()
 {
-    const float difficultyMultiplier =
-        difficulty_ == Difficulty::Hard ? constants::HARD_SPAWN_DELAY_MULTIPLIER : 1.f;
-    return spawnDelayPick_(randomEngine_) * difficultyMultiplier;
+    const auto& scale = constants::DIFFICULTY_SCALES[
+        static_cast<std::size_t>(difficulty_)];
+    return spawnDelayPick_(randomEngine_) * scale.spawnDelayMultiplier;
+}
+
+void Game::updateDifficulty()
+{
+    if (score_ >= constants::HARD_DIFFICULTY_THRESHOLD)
+    {
+        difficulty_ = Difficulty::Hard;
+    }
+    else if (score_ >= constants::MEDIUM_DIFFICULTY_THRESHOLD)
+    {
+        difficulty_ = Difficulty::Medium;
+    }
+    else
+    {
+        difficulty_ = Difficulty::Easy;
+    }
 }
 
 void Game::endGame()
@@ -338,8 +352,11 @@ void Game::endGame()
     scoreText_.setTotalScore(score_);
     centerText(scoreText_.text(), {static_cast<float>(constants::INTERNAL_WIDTH) / 2.f,
                             static_cast<float>(constants::INTERNAL_HEIGHT) / 2.f});
-    if (score_ >= difficultyThreshold_) audioManager_.playSound(AudioManager::SoundEffect::Victory); 
-    audioManager_.stopMusic();
+    if (score_ >= constants::HARD_DIFFICULTY_THRESHOLD)
+    {
+        audioManager_.playSound(AudioManager::SoundEffect::Victory);
+    }
+    audioManager_.stopMusic(AudioManager::MusicTrack::Playing);
 }
 
 void Game::centerText(sf::Text& text, sf::Vector2f position) const
