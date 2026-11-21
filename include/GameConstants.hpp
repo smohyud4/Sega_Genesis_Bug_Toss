@@ -28,9 +28,9 @@ struct DifficultyScale
 };
 
 inline constexpr std::array<DifficultyScale, 3> DIFFICULTY_SCALES{{
-    {1.f, 1.1f},
-    {0.9f, 1.25f},
-    {0.9f, 1.4f}
+    {1.f, 1.25f},
+    {1.f, 1.5f},
+    {0.90f, 1.75f}
 }};
 inline constexpr float DROPPER_STEP_DISTANCES[] = {
     600.f / 3.f, 1000.f / 3.f, 1200.f / 3.f
