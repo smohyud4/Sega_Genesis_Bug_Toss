@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "SpriteAnimation.hpp"
 
 #include <array>
 
@@ -32,17 +33,17 @@ public:
 
 private:
 
+    void updateFrame(float dt);
     void applyFrame();
     void clampToWorld();
+    void setState(State state);
 
-    const std::array<sf::IntRect, 4> animations_;
+    std::array<SpriteAnimation, 4> animations_;
     const sf::Vector2f startPosition_;
     sf::Sprite sprite_;
     State state_ = State::Idle;
     float movementDirection_ = 0.f;
     float facing_ = 1.f;
     float speed_;
-    float eatingTime_ = 0.f;
-    float burpingTime_ = 0.f;
 };
 }

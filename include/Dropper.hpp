@@ -1,9 +1,9 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "SpriteAnimation.hpp"
 
 #include <random>
-#include <vector>
 
 namespace bug_toss
 {
@@ -21,6 +21,10 @@ public:
 
 private:
     void move(float dt);
+    void updateFrame(float dt);
+    void applyFrame();
+
+    SpriteAnimation runningAnimation_;
 
     const std::vector<sf::Vector2f> path_;
     sf::Sprite sprite_;
