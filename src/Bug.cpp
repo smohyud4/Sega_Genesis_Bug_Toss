@@ -2,6 +2,8 @@
 
 #include "GameConstants.hpp"
 
+#include <cmath>
+
 namespace bug_toss
 {
 Bug::Bug(const sf::Texture& texture, sf::Vector2f startPosition, float gravity, int frameIndex)
@@ -41,5 +43,33 @@ sf::FloatRect Bug::bounds() const
 bool Bug::isDeadly() const
 {
     return isDeadly_;
+}
+
+float Bug::velocity() const
+{
+    return speed_;
+}
+
+float Bug::gravity() const
+{
+    return gravity_;
+}
+
+float Bug::timeUntilPosition(float targetY) const
+{
+    const float distance = targetY - sprite_.getPosition().y;
+    if (distance <= 0.f)
+    {
+        return 0.f;
+    }
+
+    const float discriminant =
+        (velocity() * velocity()) + (2.f * gravity() * distance);
+    if (discriminant < 0.f)
+    {
+        return 0.f;
+    }
+
+    return (-velocity() + std::sqrt(discriminant)) / gravity_;
 }
 }

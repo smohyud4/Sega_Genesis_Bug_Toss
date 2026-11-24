@@ -29,14 +29,16 @@ struct DifficultyScale
 
 inline constexpr std::array<DifficultyScale, 3> DIFFICULTY_SCALES{{
     {1.f, 1.25f},
-    {1.f, 1.5f},
-    {0.90f, 1.75f}
+    {0.8f, 2.f},
+    {0.6f, 2.5f}
 }};
 inline constexpr float DROPPER_STEP_DISTANCES[] = {
-    600.f / 3.f, 1000.f / 3.f, 1200.f / 3.f
+    800.f / 3.f, 1000.f / 3.f, 1200.f / 3.f
 };
 inline constexpr float PLAYER_EATING_DURATION = 0.12f;
 inline constexpr float PLAYER_BURPING_DURATION = 1.5f;
+inline constexpr float FAIRNESS_PLAYER_SPEED_FACTOR = 1.f;
+inline constexpr float FAIRNESS_OVERLAP_TOLERANCE = 6.f;
 inline constexpr float PLAYER_START_X = 160.f;
 inline constexpr float PLAYER_START_Y = 650.f / 3.f;
 
@@ -63,6 +65,7 @@ inline constexpr std::array<Frame, 15> BUG_FRAMES{{
 }};
 
 inline const std::bitset<15> BUG_DEADLINESS("100000000000000");
+inline constexpr float MIN_BUG_DISTANCE = 30.f;
 
 inline constexpr Frame DROPPER_FRAME{15, 104, 52, 37};
 inline constexpr Frame PLAYER_IDLE_FRAME{13, 10, 33, 38};

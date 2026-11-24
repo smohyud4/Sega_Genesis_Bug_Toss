@@ -41,7 +41,9 @@ private:
     void updateViewport(sf::Vector2u windowSize);
     void startGame();
     void endGame();
-    void spawnBug();
+    [[nodiscard]] bool spawnBug();
+    [[nodiscard]] bool isPossibleToReach(const Bug& candidate) const;
+    [[nodiscard]] bool isFarEnough(const Bug& candidate) const;
     [[nodiscard]] float nextSpawnDelay();
     void updateDifficulty();
     void centerText(sf::Text& text, sf::Vector2f position) const;
@@ -78,6 +80,7 @@ private:
     int score_ = 0;
     State state_ = State::Start;
     Difficulty difficulty_ = Difficulty::Easy;
+    int easyCounter = 0;
     float spawnTimer_ = 0.f;
 };
 }

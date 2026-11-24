@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <optional>
 #include <random>
+#include <cmath>
 #include <stdexcept>
 #include <string>
 
@@ -230,8 +231,14 @@ void Game::update(sf::Time dt)
     spawnTimer_ -= dt.asSeconds();
     if (!isBurping && spawnTimer_ <= 0.f && bugs_.size() < constants::MAX_BUGS)
     {
-        spawnBug();
-        spawnTimer_ = nextSpawnDelay();
+        if (spawnBug())
+        {
+            spawnTimer_ = nextSpawnDelay();
+        }
+        else
+        {
+            easyCounter++;
+        }
     }
 }
 
@@ -275,6 +282,7 @@ void Game::startGame()
     player_.reset();
     dropper_.reset();
     scoreText_.reset();
+    easyCounter = 0;
     burpAttempts_ = 1;
     difficulty_ = Difficulty::Easy;
     spawnTimer_ = nextSpawnDelay();
@@ -284,7 +292,7 @@ void Game::startGame()
     state_ = State::Play;
 }
 
-void Game::spawnBug()
+bool Game::spawnBug()
 {
     const auto deadlyCount = std::count_if(bugs_.begin(), bugs_.end(),
     [](const Bug& b) { return b.isDeadly(); });
@@ -294,24 +302,21 @@ void Game::spawnBug()
 
     if (!canSpawnDeadly && !canSpawnSafe)
     {
-        return;
+        return false;
     }
 
     float gravity = constants::BUG_GRAVITIES[gravityPick_(randomEngine_)];
-    const auto& scale = constants::DIFFICULTY_SCALES[
-        static_cast<std::size_t>(difficulty_)];
+    const auto& scale = constants::DIFFICULTY_SCALES[static_cast<std::size_t>(difficulty_)];
     gravity *= scale.gravityMultiplier;
     int bugIndex;
 
     if (canSpawnDeadly && canSpawnSafe)
     {
         bugIndex = bugPick_(randomEngine_);
-        bugs_.emplace_back(bugTexture_, dropper_.position(), gravity, bugIndex);
     }
     else if (!canSpawnSafe)
     {
         bugIndex = static_cast<int>(constants::BUG_FRAMES.size()) - 1;
-        bugs_.emplace_back(bugTexture_, dropper_.position(), gravity, bugIndex);
     }
     else 
     {
@@ -319,8 +324,110 @@ void Game::spawnBug()
             bugIndex = bugPick_(randomEngine_);
         } while(constants::BUG_DEADLINESS[bugIndex]);
 
-        bugs_.emplace_back(bugTexture_, dropper_.position(), gravity, bugIndex);
     }
+
+    Bug candidate(bugTexture_, dropper_.position(), gravity, bugIndex);
+
+    if (!isFarEnough(candidate))
+    {
+        return false;
+    }
+    
+    if (burpAttempts_ <= 0 && !isPossibleToReach(candidate))
+    {
+        return false;
+    }
+
+    bugs_.emplace_back(bugTexture_, dropper_.position(), gravity, bugIndex);
+    return true;
+}
+
+bool Game::isPossibleToReach(const Bug& candidate) const
+{
+    struct LandingBug
+    {
+        float landingTime;
+        float horizontalPosition;
+        float width;
+    };
+
+    std::vector<LandingBug> landingBugs;
+    landingBugs.reserve(bugs_.size() + 1);
+
+    for (const Bug& bug : bugs_)
+    {
+        
+        if (!bug.isDeadly())
+        {
+            const sf::FloatRect bounds = bug.bounds();
+            landingBugs.push_back({
+                bug.timeUntilPosition(constants::BUG_BOTTOM),
+                bounds.position.x + bounds.size.x / 2.f,
+                bounds.size.x
+            });
+        }
+    }
+
+    if (!candidate.isDeadly())
+    {
+        const sf::FloatRect candidateBounds = candidate.bounds();
+        landingBugs.push_back({
+            candidate.timeUntilPosition(constants::BUG_BOTTOM),
+            candidateBounds.position.x + candidateBounds.size.x / 2.f,
+            candidateBounds.size.x
+        });
+    }
+
+    std::sort(landingBugs.begin(), landingBugs.end(),
+              [](const LandingBug& first, const LandingBug& second)
+              {
+                  return first.landingTime < second.landingTime;
+              });
+
+    if (landingBugs.size() < 2)
+    {
+        return true;
+    }
+
+    const float playerWidth = player_.bounds().size.x;
+    const float playerSpeed =
+        player_.movementSpeed() * constants::FAIRNESS_PLAYER_SPEED_FACTOR;
+
+    for (std::size_t index = 1; index < landingBugs.size(); ++index)
+    {
+        const LandingBug& previous = landingBugs[index - 1];
+        const LandingBug& current = landingBugs[index];
+
+        const float horizontalDistance = std::abs(current.horizontalPosition - previous.horizontalPosition);
+        const float averageBugHalfWidth = (previous.width + current.width) / 4.f;
+        const float catchDistance =
+            std::max(0.f,
+                     horizontalDistance - playerWidth / 2.f -
+                     averageBugHalfWidth +
+                     constants::FAIRNESS_OVERLAP_TOLERANCE);
+
+        const float landingGap = std::max(0.f, current.landingTime - previous.landingTime);
+
+        if (catchDistance > playerSpeed * landingGap)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Game::isFarEnough(const Bug& candidate) const
+{
+    const float candidateHorizontalPosition = candidate.bounds().position.x + candidate.bounds().size.x / 2.f;
+    return std::all_of(bugs_.begin(), bugs_.end(),
+        [&](const Bug& bug)
+        {
+            const sf::FloatRect bounds = bug.bounds();
+            const float centerX = bounds.position.x + bounds.size.x / 2.f;
+            return std::abs(candidateHorizontalPosition - centerX)
+                >= constants::MIN_BUG_DISTANCE;
+        });
 }
 
 float Game::nextSpawnDelay()

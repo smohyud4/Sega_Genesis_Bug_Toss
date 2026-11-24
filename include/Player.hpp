@@ -28,6 +28,7 @@ public:
     State state() const;
 
     [[nodiscard]] sf::FloatRect bounds() const;
+    [[nodiscard]] float movementSpeed() const;
 
 private:
 

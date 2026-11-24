@@ -15,6 +15,9 @@ public:
     [[nodiscard]] sf::Vector2f position() const;
     [[nodiscard]] sf::FloatRect bounds() const;
     [[nodiscard]] bool isDeadly() const;
+    [[nodiscard]] float velocity() const;
+    [[nodiscard]] float gravity() const;
+    [[nodiscard]] float timeUntilPosition(float targetY) const;
 
 private:
     sf::Sprite sprite_;

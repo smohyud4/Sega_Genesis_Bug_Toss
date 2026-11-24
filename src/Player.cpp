@@ -103,6 +103,11 @@ sf::FloatRect Player::bounds() const
     return sprite_.getGlobalBounds();
 }
 
+float Player::movementSpeed() const
+{
+    return speed_;
+}
+
 void Player::draw(sf::RenderTarget& target) const
 {
     target.draw(sprite_);
