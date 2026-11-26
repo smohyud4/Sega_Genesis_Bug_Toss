@@ -3,7 +3,7 @@
 namespace bug_toss
 {
 AudioManager::AudioManager()
-    : damageSound_(damageBuffer_), victorySound_(victoryBuffer_)
+    : burpSound_(burpBuffer_), victorySound_(victoryBuffer_)
 {
     // Load game background music
     if (!gameMusic_.openFromFile("assets/sounds/09 - Under the Stars.mp3"))
@@ -32,11 +32,11 @@ AudioManager::AudioManager()
         eatSounds_.emplace_back(eatBuffer_);
     }
 
-    if (!damageBuffer_.loadFromFile("assets/sounds/pumba_burp.mp3"))
+    if (!burpBuffer_.loadFromFile("assets/sounds/pumba_burp.mp3"))
     {
         throw std::runtime_error("Failed to load damage sound effect");
     }
-    damageSound_.setBuffer(damageBuffer_);
+    burpSound_.setBuffer(burpBuffer_);
 
     if (!victoryBuffer_.loadFromFile("assets/sounds/pumba_win.mp3"))
     {
@@ -97,7 +97,7 @@ void AudioManager::playSound(SoundEffect effect)
             playEatSound();
             break;
         case SoundEffect::Burp:
-            damageSound_.play();
+            burpSound_.play();
             break;
         case SoundEffect::Victory:
             victorySound_.play();

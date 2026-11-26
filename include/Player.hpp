@@ -26,6 +26,7 @@ public:
     void startEating();
     void startBurping();
     void reset();
+    [[nodiscard]] int burps() const;
     State state() const;
 
     [[nodiscard]] sf::FloatRect bounds() const;
@@ -45,5 +46,6 @@ private:
     float movementDirection_ = 0.f;
     float facing_ = 1.f;
     float speed_;
+    int burps_ = 1;
 };
 }

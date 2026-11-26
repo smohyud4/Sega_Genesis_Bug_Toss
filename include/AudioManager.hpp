@@ -35,11 +35,11 @@ private:
 
     // Sound effect resources
     sf::SoundBuffer eatBuffer_;
-    sf::SoundBuffer damageBuffer_;
+    sf::SoundBuffer burpBuffer_;
     sf::SoundBuffer victoryBuffer_;
 
     // Sound effect players
-    sf::Sound damageSound_;
+    sf::Sound burpSound_;
     sf::Sound victorySound_;
 
     std::vector<sf::Sound> eatSounds_;

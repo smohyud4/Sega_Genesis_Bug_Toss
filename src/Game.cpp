@@ -117,6 +117,8 @@ void Game::run()
 
 void Game::processEvents()
 {
+    updateJoystick();
+
     while (const std::optional event = window_.pollEvent())
     {
         if (event->is<sf::Event::Closed>())
@@ -124,6 +126,8 @@ void Game::processEvents()
             window_.close();
         }
 
+        bool startPressed = false;
+        bool burpPressed = false;
         if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
         {
             if (keyPressed->code == sf::Keyboard::Key::Escape)
@@ -131,19 +135,30 @@ void Game::processEvents()
                 window_.close();
             }
 
-            if (state_ != State::Play && keyPressed->code == sf::Keyboard::Key::Enter)
-            {
-                startGame();
-            }
+            startPressed = keyPressed->code == sf::Keyboard::Key::Enter;
+            burpPressed = keyPressed->code == sf::Keyboard::Key::Space;
+        }
 
-            if (state_ == State::Play && burpAttempts_ > 0 &&
-                keyPressed->code == sf::Keyboard::Key::Space)
+        if (const auto* joystickButton = event->getIf<sf::Event::JoystickButtonPressed>())
+        {
+            if (joystickId_ && joystickButton->joystickId == *joystickId_ &&
+                joystickButton->button == 0)
             {
-                burpAttempts_--;
-                bugs_.clear();
-                audioManager_.playSound(AudioManager::SoundEffect::Burp);
-                player_.startBurping();
+                startPressed = true;
+                burpPressed = true;
             }
+        }
+
+        if (burpPressed && state_ == State::Play && player_.burps() > 0)
+        {
+            bugs_.clear();
+            audioManager_.playSound(AudioManager::SoundEffect::Burp);
+            player_.startBurping();
+        }
+
+        if (startPressed && state_ != State::Play)
+        {
+            startGame();
         }
 
         if (const auto* mouseButton = event->getIf<sf::Event::MouseButtonPressed>())
@@ -185,6 +200,7 @@ void Game::update(sf::Time dt)
     {
         playerDirection += 1.f;
     }
+    playerDirection = std::clamp(playerDirection + joystickDirection(), -1.f, 1.f);
 
     player_.setMovementDirection(playerDirection);
     player_.update(dt);
@@ -235,11 +251,52 @@ void Game::update(sf::Time dt)
         {
             spawnTimer_ = nextSpawnDelay();
         }
-        else
-        {
-            easyCounter++;
-        }
     }
+}
+
+void Game::updateJoystick()
+{
+    sf::Joystick::update();
+    joystickId_.reset();
+
+    std::optional<unsigned int> connectedJoystick;
+    for (unsigned int joystick = 0; joystick < sf::Joystick::Count; ++joystick)
+    {
+        if (!sf::Joystick::isConnected(joystick))
+        {
+            continue;
+        }
+
+        if (connectedJoystick)
+        {
+            return;
+        }
+        connectedJoystick = joystick;
+    }
+
+    if (connectedJoystick && sf::Joystick::getButtonCount(*connectedJoystick) > 0 &&
+        sf::Joystick::hasAxis(*connectedJoystick, sf::Joystick::Axis::X))
+    {
+        joystickId_ = connectedJoystick;
+    }
+}
+
+float Game::joystickDirection() const
+{
+    if (!joystickId_)
+    {
+        return 0.f;
+    }
+
+    const float axisPosition =
+        sf::Joystick::getAxisPosition(*joystickId_, sf::Joystick::Axis::X);
+    const float absolutePosition = std::abs(axisPosition);
+    if (absolutePosition <= constants::JOYSTICK_DEADZONE)
+    {
+        return 0.f;
+    }
+
+    return axisPosition > 0.f ? 1.f : -1.f;
 }
 
 void Game::render()
@@ -282,8 +339,6 @@ void Game::startGame()
     player_.reset();
     dropper_.reset();
     scoreText_.reset();
-    easyCounter = 0;
-    burpAttempts_ = 1;
     difficulty_ = Difficulty::Easy;
     spawnTimer_ = nextSpawnDelay();
 
@@ -333,7 +388,7 @@ bool Game::spawnBug()
         return false;
     }
     
-    if (burpAttempts_ <= 0 && !isPossibleToReach(candidate))
+    if (player_.burps() <= 0 && !isPossibleToReach(candidate))
     {
         return false;
     }

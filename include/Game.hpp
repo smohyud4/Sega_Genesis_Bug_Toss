@@ -8,6 +8,7 @@
 #include "AnimatedText.hpp"
 #include "AudioManager.hpp"
 
+#include <optional>
 #include <random>
 #include <vector>
 
@@ -46,6 +47,8 @@ private:
     [[nodiscard]] bool isFarEnough(const Bug& candidate) const;
     [[nodiscard]] float nextSpawnDelay();
     void updateDifficulty();
+    void updateJoystick();
+    [[nodiscard]] float joystickDirection() const;
     void centerText(sf::Text& text, sf::Vector2f position) const;
     void handleMenuActivation(sf::Vector2f position);
 
@@ -72,15 +75,14 @@ private:
     std::uniform_int_distribution<int> bugPick_;
     std::uniform_int_distribution<int> gravityPick_;
     std::uniform_real_distribution<float> spawnDelayPick_;
+    std::optional<unsigned int> joystickId_;
 
     Player player_;
     Dropper dropper_;
     std::vector<Bug> bugs_;
-    int burpAttempts_ = 1;
     int score_ = 0;
     State state_ = State::Start;
     Difficulty difficulty_ = Difficulty::Easy;
-    int easyCounter = 0;
     float spawnTimer_ = 0.f;
 };
 }

@@ -19,7 +19,7 @@ inline constexpr int MEDIUM_DIFFICULTY_THRESHOLD = 30;
 inline constexpr int HARD_DIFFICULTY_THRESHOLD = 60;
 inline constexpr unsigned int MENU_TEXT_SIZE = 24;
 inline constexpr float TEXT_ANIMATION_DURATION = 1.f;
-inline constexpr std::array<float, 3> BUG_GRAVITIES = {75.f, 75.f * 1.5f, 75.f * 2.25f};
+inline constexpr std::array<float, 3> BUG_GRAVITIES = {100.f, 100.f * 1.5f, 100.f * 2.25f};
 
 struct DifficultyScale
 {
@@ -42,6 +42,7 @@ inline constexpr float PLAYER_IDLE_DURATION = 1.5f;
 inline constexpr float DROPPER_RUNNING_DURATION = 1.f;
 inline constexpr float FAIRNESS_PLAYER_SPEED_FACTOR = 1.f;
 inline constexpr float FAIRNESS_OVERLAP_TOLERANCE = 6.f;
+inline constexpr float JOYSTICK_DEADZONE = 15.f;
 inline constexpr float PLAYER_START_X = 160.f;
 inline constexpr float PLAYER_START_Y = 650.f / 3.f;
 

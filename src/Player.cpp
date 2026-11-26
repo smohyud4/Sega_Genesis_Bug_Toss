@@ -168,6 +168,12 @@ void Player::startEating()
 
 void Player::startBurping()
 {
+    if (burps_ <= 0)
+    {
+        return;
+    }
+
+    --burps_;
     setState(State::Burp);
 }
 
@@ -176,8 +182,14 @@ void Player::reset()
     setState(State::Idle);
     movementDirection_ = 0.f;
     facing_ = 1.f;
+    burps_ = 1;
     sprite_.setPosition(startPosition_);
     applyFrame();
+}
+
+int Player::burps() const
+{
+    return burps_;
 }
 
 Player::State Player::state() const
