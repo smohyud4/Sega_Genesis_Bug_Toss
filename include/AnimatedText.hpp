@@ -13,6 +13,7 @@ public:
     void draw(sf::RenderTarget& target) const;
     void reset();
     void setTotalScore(int score);
+    int currScore() const;
     sf::Text& text();
 private:
     float time_ = 0.f;

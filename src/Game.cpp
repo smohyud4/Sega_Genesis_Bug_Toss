@@ -156,7 +156,7 @@ void Game::processEvents()
             player_.startBurping();
         }
 
-        if (startPressed && state_ != State::Play)
+        if (state_ != State::Play && startPressed && scoreText_.currScore() == score_)
         {
             startGame();
         }

@@ -49,6 +49,11 @@ void AnimatedText::draw(sf::RenderTarget& target) const
     target.draw(text_);
 }
 
+int AnimatedText::currScore() const
+{
+    return score_;
+}
+
 sf::Text& AnimatedText::text()
 {
     return text_;
